@@ -1,0 +1,20 @@
+# Blender MTL File: 'schaufel.blend'
+# Material Count: 2
+
+newmtl Bronze_Voronoi
+Ns 37.254902
+Ka 0.000000 0.000000 0.000000
+Kd 0.183075 0.140430 0.140430
+Ks 0.788495 0.778710 0.720000
+Ni 1.000000
+d 1.000000
+illum 2
+
+newmtl brightly_beech
+Ns 23.529412
+Ka 0.000000 0.000000 0.000000
+Kd 0.658650 0.503084 0.315383
+Ks 0.258993 0.258993 0.258993
+Ni 1.000000
+d 1.000000
+illum 2
