@@ -6,11 +6,18 @@ public class GravekeeperController : MonoBehaviour
 
     private Camera _mainCamera;
 
+    [SerializeField] private GameObject inHandShovel;
+
+    [SerializeField] private GameObject handReference;
+
     [SerializeField] private float characterSpeed = 4;
 
-    [SerializeField]
-    private Collider terrainCollider;
+    [SerializeField] private Collider terrainCollider;
 
+    [SerializeField] private GameObject shovelProjectile;
+
+    [SerializeField] private GameObject weaponHandPosition;
+    
     private Vector3 _cameraOffset;
 
     private RaycastHit _hit;
@@ -18,6 +25,12 @@ public class GravekeeperController : MonoBehaviour
     private Ray _ray;
 
     private Animator _animator;
+
+    private GameObject _itemInRange;
+
+    private GameObject _heldItem;
+
+    private bool _digging = false;
 
     // Start is called before the first frame update
     void Start()
@@ -30,10 +43,6 @@ public class GravekeeperController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
-      
-        
-        
         // Perform look at mouse continously
         _ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
         if (terrainCollider.Raycast(_ray, out _hit, 100))
@@ -56,6 +65,32 @@ public class GravekeeperController : MonoBehaviour
             _animator.SetBool("Run", false);
         }
 
+        if (Input.GetKey(KeyCode.E))
+        {
+            if (_itemInRange != null && _heldItem == null)
+            {
+               _heldItem = Instantiate(inHandShovel, handReference.transform.position, handReference.transform.rotation, handReference.transform);
+               Destroy(_itemInRange);
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (!_digging && _heldItem != null)
+            {
+                _animator.SetBool("Dig", true);
+                _digging = true;
+            }
+        }
+
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            if (_digging)
+            {
+                _animator.SetBool("Dig", false);
+                _digging = false;
+            }
+        }
         
         // Primitive camera zooming
         _mainCamera.fieldOfView -= Input.mouseScrollDelta.y * 2;
@@ -63,5 +98,28 @@ public class GravekeeperController : MonoBehaviour
         
         // Update camera position
         _mainCamera.transform.position = transform.position + _cameraOffset;
+        
+        
+        // Debug
+        if (Input.GetMouseButtonDown(1))
+        {
+            GameObject projectile = Instantiate(shovelProjectile, weaponHandPosition.transform.position, transform.rotation);
+            projectile.GetComponentInChildren<Rigidbody>().AddForce(transform.forward * 30f, ForceMode.Impulse);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        Debug.Log("col");
+        if (other.gameObject.CompareTag("Shovel"))
+        {
+            _itemInRange = other.gameObject;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        // Temp
+        _itemInRange = null;
     }
 }
