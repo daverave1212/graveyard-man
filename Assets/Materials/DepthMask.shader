@@ -2,7 +2,7 @@
 
 	SubShader{
 
-		Tags {"Queue" = "Geomtry-1"}
+		Tags {"Queue" = "Geometry-1"}
 
 		ColorMask 0
 		ZWrite On
