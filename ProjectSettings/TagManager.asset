@@ -42,3 +42,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: UIShadow
+    uniqueID: 572417099
+    locked: 0
+  - name: UIButton
+    uniqueID: 4230587573
+    locked: 0

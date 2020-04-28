@@ -41,7 +41,7 @@ GameObject:
   - component: {fileID: 4286668710296377909}
   - component: {fileID: 6194505279584597839}
   m_Layer: 0
-  m_Name: Ninja
+  m_Name: LowpolyNinja
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -73,7 +73,7 @@ Animator:
   m_GameObject: {fileID: 947470756653672486}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 728f6ad2b27850b428c6447c047db511, type: 3}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: ab1ba60350b1ef8409162fe73f5ed934, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -137,7 +137,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1305656112745619308}
   m_LocalRotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalPosition: {x: -0, y: 0, z: 0.005}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 2621747303556328270}
@@ -631,7 +631,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3034674779516343405}
-  m_LocalRotation: {x: -0.052410595, y: 0.014873276, z: 0.0055962135, w: 0.99849916}
+  m_LocalRotation: {x: -0.0524106, y: 0.014873276, z: 0.005596214, w: 0.99849916}
   m_LocalPosition: {x: -0.000000014305114, y: 0.029751383, z: -0.000000062063336}
   m_LocalScale: {x: 1.0000001, y: 1.0000002, z: 1.0000001}
   m_Children:
@@ -966,6 +966,7 @@ SkinnedMeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1739,7 +1740,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7721105708125667459}
-  m_LocalRotation: {x: -0.052410543, y: -0.014873345, z: -0.005596215, w: 0.99849916}
+  m_LocalRotation: {x: -0.052410547, y: -0.014873345, z: -0.0055962154, w: 0.99849916}
   m_LocalPosition: {x: -0.0000000047683715, y: 0.029751373, z: 0.000000018961726}
   m_LocalScale: {x: 1, y: 0.99999976, z: 0.9999998}
   m_Children:
