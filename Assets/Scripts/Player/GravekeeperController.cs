@@ -107,7 +107,8 @@ public class GravekeeperController : MonoBehaviour
             projectile.GetComponentInChildren<Rigidbody>().AddForce(transform.forward * 30f, ForceMode.Impulse);
         }
     }
-
+    
+    
     private void OnTriggerEnter(Collider other)
     {
         Debug.Log("col");
