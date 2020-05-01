@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class HoleScript : MonoBehaviour
 {
-
-
     [SerializeField] private GameObject shaderHole;
 
     Vector3 originalPosition;
@@ -13,26 +11,33 @@ public class HoleScript : MonoBehaviour
     Trembler trembler;
     ParticleSystem particles;
 
+    private bool _paused;
+
+    private float _progress;
+
     [SerializeField] private float timeToDig = 2.0f;
-    
-    void Start() {
+
+    void Start()
+    {
         slider = GetComponent<Slider>();
         trembler = GetComponent<Trembler>();
         particles = transform.Find("DustParticles").GetComponent<ParticleSystem>();
         if (particles == null) print("Failed to find particles");
         particles.enableEmission = false;
-        
+
         PlayAnimation();
         StartCoroutine(HoleProgress());
     }
 
-    public void PlayAnimation() {
+    public void PlayAnimation()
+    {
         originalPosition = transform.position;
         trembler.StartTrembling();
         particles.enableEmission = true;
     }
-    
-    public void StopAnimation() {
+
+    public void StopAnimation()
+    {
         transform.position = originalPosition;
         trembler.StopTrembling();
         particles.enableEmission = false;
@@ -41,13 +46,33 @@ public class HoleScript : MonoBehaviour
     IEnumerator HoleProgress()
     {
         float _elapsed = 0.0f;
-        while(_elapsed < timeToDig)
+        while (_elapsed < timeToDig)
         {
-            _elapsed += Time.deltaTime;
+            if (!_paused)
+            {
+                _elapsed += Time.deltaTime;
+            }
+
             yield return null;
         }
+
         StopAnimation();
         shaderHole.SetActive(true);
     }
 
+    public void PauseDigging()
+    {
+        _paused = true;
+        StopAnimation();
+    }
+
+    public void ResumeDigging()
+    {
+        _paused = false;
+
+        if (_progress <= 1.0f)
+        {
+            PlayAnimation();
+        }
+    }
 }

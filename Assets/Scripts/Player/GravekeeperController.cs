@@ -19,7 +19,6 @@ public class GravekeeperController : MonoBehaviour
 
     [SerializeField] private GameObject holePrefab;
 
-    [SerializeField] private PlaneTriangleGetter planeTriangler;
 
     private Vector3 _cameraOffset;
 
@@ -29,15 +28,21 @@ public class GravekeeperController : MonoBehaviour
 
     private Animator _animator;
 
-    private GameObject _itemInRange;
-
-    private GameObject _heldItem;
-
-    private bool _heldCorpse;
+    // Flags
 
     private GameObject _corpseInRange;
 
-    private bool _digging = false;
+    private GameObject _itemInRange;
+
+    private GameObject _holeInRange;
+
+    private GameObject _heldItem;
+
+    private bool _digging;
+
+    private bool _holdingCorpse;
+
+    private bool _holdingShovel;
 
     // Start is called before the first frame update
     void Start()
@@ -74,49 +79,76 @@ public class GravekeeperController : MonoBehaviour
             _animator.SetBool("Run", false);
         }
 
-        if (Input.GetKey(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.E))
         {
-            if (_itemInRange != null && _heldItem == null)
+            if (_itemInRange != null && _heldItem == null &&
+                (_itemInRange.CompareTag("PickableShovel") || _itemInRange.CompareTag("ProjectileShovel")))
             {
+                _holdingShovel = true;
                 _heldItem = Instantiate(inHandShovel, handReference.transform.position,
                     handReference.transform.rotation, handReference.transform);
                 Destroy(_itemInRange);
             }
         }
 
-        if (Input.GetKey(KeyCode.Q))
+        if (Input.GetKeyDown(KeyCode.Q))
         {
-            if (_corpseInRange != null && _heldItem == null)
+            Debug.Log("Corpse In Range: " + (_corpseInRange != null));
+            Debug.Log("Held item: " + (_heldItem != null));
+            if (_corpseInRange != null)
             {
+                Debug.Log("Corpse in range tag" + _corpseInRange.tag);
+            }
+
+            Debug.Log("Holding corpse: " + _holdingCorpse);
+
+            if (_corpseInRange != null && _heldItem == null && _corpseInRange.CompareTag("Enemy") && !_holdingCorpse)
+            {
+                Debug.Log("Iau corpu");
                 _heldItem = _corpseInRange.GetComponent<Enemy>().draggablePart;
-                _heldCorpse = true;
+                _holdingCorpse = true;
 
-                // Assure we ignore collision between player and ragdoll...
-                Collider[] ragdollColliders = _corpseInRange.GetComponentsInChildren<Collider>();
-                Collider ownCollider = GetComponent<Collider>();
-
-                foreach (var ragdollCollider in ragdollColliders)
-                {
-                    Physics.IgnoreCollision(ownCollider, ragdollCollider, true);
-                }
-
-                // _corpseInRange.transform.parent = weaponHandPosition.transform;
-                // _corpseInRange.transform.localPosition = Vector3.zero;
+                SetCollisionsWithGameObject(_corpseInRange, false);
+            }
+            else if (_holeInRange != null && _holdingCorpse)
+            {
+                Debug.Log("Pun coerpungroapa");
+                _holdingCorpse = false;
+                SetCollisionsWithGameObject(_heldItem.GetComponentInParent<Enemy>().gameObject, true);
+                _heldItem.transform.position = _holeInRange.transform.position;
+                _heldItem = null;
+            }
+            else if (_holdingCorpse)
+            {
+                Debug.Log("Dau drumu la corp");
+                SetCollisionsWithGameObject(_heldItem.GetComponentInParent<Enemy>().gameObject, true);
+                _heldItem.GetComponentInParent<Enemy>().gameObject.transform.position = _heldItem.transform.position;
+                _holdingCorpse = false;
+                _heldItem = null;
             }
         }
 
-        if (_heldItem && _heldCorpse)
+        if (_heldItem != null && _holdingCorpse)
         {
             _heldItem.transform.position = weaponHandPosition.transform.position;
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (!_digging && _heldItem != null)
+            if (!_digging && _holdingShovel)
             {
                 _animator.SetBool("Dig", true);
                 _digging = true;
-                Instantiate(holePrefab, transform.position + transform.forward * 2.0f, Quaternion.identity);
+
+                if (!_holeInRange)
+                {
+                    _holeInRange = Instantiate(holePrefab, transform.position + transform.forward * 2.0f,
+                        Quaternion.identity);
+                }
+                else
+                {
+                    _holeInRange.GetComponent<HoleScript>().ResumeDigging();
+                }
             }
         }
 
@@ -126,6 +158,7 @@ public class GravekeeperController : MonoBehaviour
             {
                 _animator.SetBool("Dig", false);
                 _digging = false;
+                _holeInRange.GetComponent<HoleScript>().PauseDigging();
             }
         }
 
@@ -138,12 +171,13 @@ public class GravekeeperController : MonoBehaviour
 
 
         // Debug
-        if (Input.GetMouseButtonDown(1) && _heldItem != null)
+        if (Input.GetMouseButtonDown(1) && _heldItem != null && _holdingShovel)
         {
             GameObject projectile =
                 Instantiate(shovelProjectile, weaponHandPosition.transform.position, transform.rotation);
             projectile.GetComponentInChildren<Rigidbody>().AddForce(transform.forward * 30f, ForceMode.Impulse);
             Destroy(_heldItem);
+            _holdingShovel = false;
         }
     }
 
@@ -161,16 +195,54 @@ public class GravekeeperController : MonoBehaviour
                 _itemInRange = other.gameObject;
             }
         }
-
-        if (other.gameObject.CompareTag("Enemy"))
+        else if (other.gameObject.CompareTag("Enemy"))
         {
-            _corpseInRange = other.gameObject;
+            if (other.gameObject.GetComponent<Enemy>().knocked)
+            {
+                _corpseInRange = other.gameObject;
+            }
+        }
+        else if (other.gameObject.CompareTag("Hole"))
+        {
+            Debug.Log("Hole in range");
+            _holeInRange = other.gameObject;
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        // Temp
-        _itemInRange = null;
+        if (other.gameObject.CompareTag("PickableShovel"))
+        {
+            _itemInRange = null;
+        }
+        else if (other.gameObject.CompareTag("ProjectileShovel"))
+        {
+            _itemInRange = null;
+        }
+        else if (other.gameObject.CompareTag("Enemy"))
+        {
+            if (other.gameObject.Equals(_corpseInRange))
+            {
+                _corpseInRange = null;
+            }
+        }
+        else if (other.gameObject.CompareTag("Hole"))
+        {
+            Debug.Log("Hole out of range");
+            _holeInRange = null;
+        }
+    }
+
+
+    private void SetCollisionsWithGameObject(GameObject otherGO, bool state)
+    {
+        // Assure we ignore collision between player and ragdoll...
+        Collider[] ragdollColliders = otherGO.GetComponentsInChildren<Collider>();
+        Collider ownCollider = GetComponent<Collider>();
+
+        foreach (var ragdollCollider in ragdollColliders)
+        {
+            Physics.IgnoreCollision(ownCollider, ragdollCollider, !state);
+        }
     }
 }

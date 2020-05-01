@@ -65,9 +65,9 @@ public class Enemy : MonoBehaviour
 
     public void SetRagdollState(bool state)
     {
-        foreach (var capsuleCollider in _colliders)
+        foreach (var collider in _colliders)
         {
-            capsuleCollider.enabled = state;
+            collider.enabled = state;
         }
 
         foreach (var rb in _rbs)

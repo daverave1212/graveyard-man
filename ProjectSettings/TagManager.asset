@@ -9,6 +9,7 @@ TagManager:
   - ProjectileShovel
   - PickableShovel
   - Terrain
+  - Hole
   layers:
   - Default
   - TransparentFX
