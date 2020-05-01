@@ -28,7 +28,7 @@ public class GravekeeperController : MonoBehaviour
 
     [SerializeField] private GameObject hpBar;
 
-    [SerializeField] private GameObject hpLabel;
+    [SerializeField] private TextMeshProUGUI hpLabel;
 
     [SerializeField] private GameObject hurtEffectPanel;
 
@@ -304,15 +304,6 @@ public class GravekeeperController : MonoBehaviour
         SetCollisionsWithGameObject(enemy, true);
     }
 
-
-    private void OnCollisionEnter(Collision other)
-    {
-        if (other.gameObject.CompareTag("Enemy"))
-        {
-            DealDamage();
-        }
-    }
-
     private bool _hurtEffectPlaying;
 
     private void DealDamage()
@@ -321,7 +312,7 @@ public class GravekeeperController : MonoBehaviour
         StopCoroutine(PlayHurtEffect());
         StartCoroutine(PlayHurtEffect());
         _hpBarRectTransform.transform.localScale = new Vector3(health / 100.0f, 1.0f, 1.0f);
-        hpLabel.GetComponent<TextMeshPro>().text = health.ToString() + "%";
+        hpLabel.text = health.ToString() + "%";
     }
 
     IEnumerator PlayHurtEffect()
@@ -335,7 +326,7 @@ public class GravekeeperController : MonoBehaviour
         color.a = 0.0f;
         while (_currentTime < _duration)
         {
-            color.a = _currentTime / _duration * 0.5f;
+            color.a = _currentTime / _duration * 40f;
             imageRef.color = color;
             yield return null;
         }
@@ -343,7 +334,7 @@ public class GravekeeperController : MonoBehaviour
         _currentTime = 0.0f;
         while (_currentTime < _duration)
         {
-            color.a = 1 - (_currentTime / _duration) * 0.5f;
+            color.a = 1 - (_currentTime / _duration) * 40f;
             imageRef.color = color;
             yield return null;
         }

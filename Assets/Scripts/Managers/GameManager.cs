@@ -6,7 +6,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; set; }
 
-    public const float EnemySpawnRate = 10.0f;
+    [SerializeField] public float EnemySpawnRate = 15.0f;
 
     private WaitForSeconds _waitForSpawn;
 
