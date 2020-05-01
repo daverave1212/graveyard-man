@@ -91,6 +91,7 @@ public class HoleScript : MonoBehaviour
         {
             Destroy(gameObject);
             Destroy(_corpse);
+            GravekeeperController.Instance.StopDigging();
         }
     }
 

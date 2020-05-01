@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditorInternal;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour
@@ -9,6 +10,10 @@ public class Enemy : MonoBehaviour
 
     [SerializeField] private SphereCollider triggerCollider;
 
+    [SerializeField] private float timeToRevive = 15.0f;
+
+    [SerializeField] private Collider projectileHitbox;
+
     private Collider[] _colliders;
     private Rigidbody[] _rbs;
 
@@ -16,18 +21,26 @@ public class Enemy : MonoBehaviour
 
     public bool knocked = false;
 
+    public bool buried = false;
+
+    private float originalHeight;
+
     private void Start()
     {
         _colliders = transform.GetChild(0).gameObject.GetComponentsInChildren<Collider>();
         _rbs = transform.GetChild(0).gameObject.GetComponentsInChildren<Rigidbody>();
 
-        // Make trigger sphere to ignore inner colliders...
+        originalHeight = draggablePart.transform.position.y;
+
+        // Make trigger sphere and projectile collider to ignore inner colliders...
         foreach (var childCollider in _colliders)
         {
             Physics.IgnoreCollision(triggerCollider, childCollider, true);
+            Physics.IgnoreCollision(projectileHitbox, childCollider, true);
         }
 
         SetRagdollState(false);
+        projectileHitbox.enabled = true;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -35,6 +48,7 @@ public class Enemy : MonoBehaviour
         if (collision.gameObject.CompareTag("ProjectileShovel"))
         {
             Rigidbody otherRb = collision.gameObject.GetComponent<Rigidbody>();
+            otherRb.freezeRotation = false;
             float initialVelocityMagnitude = otherRb.velocity.sqrMagnitude;
 
             otherRb.AddForce(otherRb.velocity * -1.1f, ForceMode.Impulse);
@@ -81,5 +95,22 @@ public class Enemy : MonoBehaviour
         knocked = true;
         GetComponentInChildren<Animator>().enabled = false;
         SetRagdollState(true);
+        // StartCoroutine(Revive()); We don't do dis no more, too wonky.
+    }
+
+    IEnumerator Revive()
+    {
+        yield return new WaitForSeconds(5.0f);
+        if (buried)
+        {
+            yield break;
+        }
+        SetRagdollState(false);
+        draggablePart.transform.rotation = Quaternion.identity;
+        draggablePart.transform.position = new Vector3(draggablePart.transform.position.x, originalHeight, draggablePart.transform.position.z);
+        GetComponentInChildren<Animator>().enabled = true;
+        EnemyManager.Instance.ReAddEnemy(gameObject);
+        GravekeeperController.Instance.ResetCollisionForEnemy(gameObject);
+        knocked = false;
     }
 }

@@ -1,13 +1,20 @@
 ﻿using System;
+using System.Collections;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GravekeeperController : MonoBehaviour
 {
+    public static GravekeeperController Instance { get; set; }
+
     private Camera _mainCamera;
 
     [SerializeField] private GameObject inHandShovel;
 
     [SerializeField] private GameObject handReference;
+
+    [SerializeField] private GameObject headReference;
 
     [SerializeField] private float characterSpeed = 4;
 
@@ -19,6 +26,15 @@ public class GravekeeperController : MonoBehaviour
 
     [SerializeField] private GameObject holePrefab;
 
+    [SerializeField] private GameObject hpBar;
+
+    [SerializeField] private GameObject hpLabel;
+
+    [SerializeField] private GameObject hurtEffectPanel;
+
+    private RectTransform _hpBarRectTransform;
+
+    public float health = 100.0f;
 
     private Vector3 _cameraOffset;
 
@@ -44,12 +60,26 @@ public class GravekeeperController : MonoBehaviour
 
     private bool _holdingShovel;
 
+
+    private void Awake()
+    {
+        if (!Instance)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         _mainCamera = Camera.main;
         _cameraOffset = _mainCamera.transform.position;
         _animator = gameObject.GetComponent<Animator>();
+        _hpBarRectTransform = hpBar.GetComponent<RectTransform>();
     }
 
     // Update is called once per frame
@@ -59,7 +89,9 @@ public class GravekeeperController : MonoBehaviour
         _ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
         if (terrainCollider != null && terrainCollider.Raycast(_ray, out _hit, 100))
         {
-            transform.LookAt(_hit.point, Vector3.up);
+            Vector3 newPoint = _hit.point;
+            newPoint.y = transform.position.y; // Correct wrong rotation on X/Y axis.
+            transform.LookAt(newPoint, Vector3.up);
         }
 
 
@@ -115,7 +147,8 @@ public class GravekeeperController : MonoBehaviour
                 Debug.Log("Pun coerpungroapa");
                 _holdingCorpse = false;
                 SetCollisionsWithGameObject(_heldItem.GetComponentInParent<Enemy>().gameObject, true);
-                _holeInRange.GetComponentInChildren<HoleScript>().SetCorpse(_heldItem.GetComponentInParent<Enemy>().gameObject);
+                _holeInRange.GetComponentInChildren<HoleScript>()
+                    .SetCorpse(_heldItem.GetComponentInParent<Enemy>().gameObject);
                 _heldItem.transform.position = _holeInRange.transform.position;
                 _heldItem = null;
             }
@@ -123,7 +156,7 @@ public class GravekeeperController : MonoBehaviour
             {
                 Debug.Log("Dau drumu la corp");
                 SetCollisionsWithGameObject(_heldItem.GetComponentInParent<Enemy>().gameObject, true);
-              
+
                 _heldItem.GetComponentInParent<Enemy>().gameObject.transform.position =
                     transform.position + transform.forward * 2.0f + Vector3.up;
                 _heldItem.transform.position = _heldItem.GetComponentInParent<Enemy>().gameObject.transform.position;
@@ -158,12 +191,7 @@ public class GravekeeperController : MonoBehaviour
 
         if (Input.GetKeyUp(KeyCode.Space))
         {
-            if (_digging && _holeInRange != null)
-            {
-                _animator.SetBool("Dig", false);
-                _digging = false;
-                _holeInRange.GetComponent<HoleScript>().PauseDigging();
-            }
+            StopDigging();
         }
 
         // Primitive camera zooming
@@ -177,11 +205,7 @@ public class GravekeeperController : MonoBehaviour
         // Debug
         if (Input.GetMouseButtonDown(1) && _heldItem != null && _holdingShovel)
         {
-            GameObject projectile =
-                Instantiate(shovelProjectile, weaponHandPosition.transform.position, transform.rotation);
-            projectile.GetComponentInChildren<Rigidbody>().AddForce(transform.forward * 30f, ForceMode.Impulse);
-            Destroy(_heldItem);
-            _holdingShovel = false;
+            SpawnProjectile();
         }
     }
 
@@ -241,13 +265,87 @@ public class GravekeeperController : MonoBehaviour
 
     private void SetCollisionsWithGameObject(GameObject otherGO, bool state)
     {
-        // Assure we ignore collision between player and ragdoll...
         Collider[] ragdollColliders = otherGO.GetComponentsInChildren<Collider>();
         Collider ownCollider = GetComponent<Collider>();
 
         foreach (var ragdollCollider in ragdollColliders)
         {
             Physics.IgnoreCollision(ownCollider, ragdollCollider, !state);
+        }
+    }
+
+    public void StopDigging()
+    {
+        if (_digging)
+        {
+            _animator.SetBool("Dig", false);
+            _digging = false;
+            if (_holeInRange != null)
+            {
+                _holeInRange.GetComponent<HoleScript>().PauseDigging();
+            }
+        }
+    }
+
+    private void SpawnProjectile()
+    {
+        Vector3 projectileStartPos = transform.position + transform.forward * 1.1f;
+        projectileStartPos.y = headReference.transform.position.y;
+        GameObject projectile =
+            Instantiate(shovelProjectile, projectileStartPos, transform.rotation);
+        Rigidbody projectileRB = projectile.GetComponentInChildren<Rigidbody>();
+        projectileRB.AddForce(transform.forward * 30f, ForceMode.VelocityChange);
+        Destroy(_heldItem);
+        _holdingShovel = false;
+    }
+
+    public void ResetCollisionForEnemy(GameObject enemy)
+    {
+        SetCollisionsWithGameObject(enemy, true);
+    }
+
+
+    private void OnCollisionEnter(Collision other)
+    {
+        if (other.gameObject.CompareTag("Enemy"))
+        {
+            DealDamage();
+        }
+    }
+
+    private bool _hurtEffectPlaying;
+
+    private void DealDamage()
+    {
+        health -= 5.0f;
+        StopCoroutine(PlayHurtEffect());
+        StartCoroutine(PlayHurtEffect());
+        _hpBarRectTransform.transform.localScale = new Vector3(health / 100.0f, 1.0f, 1.0f);
+        hpLabel.GetComponent<TextMeshPro>().text = health.ToString() + "%";
+    }
+
+    IEnumerator PlayHurtEffect()
+    {
+        Image imageRef = hurtEffectPanel.GetComponent<Image>();
+        Color color = imageRef.color;
+
+        float _duration = 0.5f;
+        float _currentTime = 0.0f;
+
+        color.a = 0.0f;
+        while (_currentTime < _duration)
+        {
+            color.a = _currentTime / _duration * 0.5f;
+            imageRef.color = color;
+            yield return null;
+        }
+
+        _currentTime = 0.0f;
+        while (_currentTime < _duration)
+        {
+            color.a = 1 - (_currentTime / _duration) * 0.5f;
+            imageRef.color = color;
+            yield return null;
         }
     }
 }

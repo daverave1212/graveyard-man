@@ -51,7 +51,10 @@ public class EnemyManager : MonoBehaviour
     public void DestroyEnemy(GameObject referenceObject)
     {
         _enemies.Remove(referenceObject);
-        // Destroy(referenceObject);
+    }
 
+    public void ReAddEnemy(GameObject enemy)
+    {
+        _enemies.Add(enemy);
     }
 }
