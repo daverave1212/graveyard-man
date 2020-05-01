@@ -5,6 +5,10 @@ TagManager:
   serializedVersion: 2
   tags:
   - Shovel
+  - Enemy
+  - ProjectileShovel
+  - PickableShovel
+  - Terrain
   layers:
   - Default
   - TransparentFX
