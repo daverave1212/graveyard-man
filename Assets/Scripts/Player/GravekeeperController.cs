@@ -115,6 +115,7 @@ public class GravekeeperController : MonoBehaviour
                 Debug.Log("Pun coerpungroapa");
                 _holdingCorpse = false;
                 SetCollisionsWithGameObject(_heldItem.GetComponentInParent<Enemy>().gameObject, true);
+                _holeInRange.GetComponentInChildren<HoleScript>().SetCorpse(_heldItem.GetComponentInParent<Enemy>().gameObject);
                 _heldItem.transform.position = _holeInRange.transform.position;
                 _heldItem = null;
             }
@@ -122,7 +123,10 @@ public class GravekeeperController : MonoBehaviour
             {
                 Debug.Log("Dau drumu la corp");
                 SetCollisionsWithGameObject(_heldItem.GetComponentInParent<Enemy>().gameObject, true);
-                _heldItem.GetComponentInParent<Enemy>().gameObject.transform.position = _heldItem.transform.position;
+              
+                _heldItem.GetComponentInParent<Enemy>().gameObject.transform.position =
+                    transform.position + transform.forward * 2.0f + Vector3.up;
+                _heldItem.transform.position = _heldItem.GetComponentInParent<Enemy>().gameObject.transform.position;
                 _holdingCorpse = false;
                 _heldItem = null;
             }
@@ -154,7 +158,7 @@ public class GravekeeperController : MonoBehaviour
 
         if (Input.GetKeyUp(KeyCode.Space))
         {
-            if (_digging)
+            if (_digging && _holeInRange != null)
             {
                 _animator.SetBool("Dig", false);
                 _digging = false;
@@ -197,9 +201,10 @@ public class GravekeeperController : MonoBehaviour
         }
         else if (other.gameObject.CompareTag("Enemy"))
         {
-            if (other.gameObject.GetComponent<Enemy>().knocked)
+            Debug.Log("ENEMI");
+            if (other.gameObject.GetComponentInParent<Enemy>().knocked)
             {
-                _corpseInRange = other.gameObject;
+                _corpseInRange = other.gameObject.GetComponentInParent<Enemy>().gameObject;
             }
         }
         else if (other.gameObject.CompareTag("Hole"))

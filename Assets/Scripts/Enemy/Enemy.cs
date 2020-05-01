@@ -7,6 +7,8 @@ public class Enemy : MonoBehaviour
 {
     [SerializeField] private GameObject hint;
 
+    [SerializeField] private SphereCollider triggerCollider;
+
     private Collider[] _colliders;
     private Rigidbody[] _rbs;
 
@@ -20,8 +22,6 @@ public class Enemy : MonoBehaviour
         _rbs = transform.GetChild(0).gameObject.GetComponentsInChildren<Rigidbody>();
 
         // Make trigger sphere to ignore inner colliders...
-        SphereCollider triggerCollider = GetComponent<SphereCollider>();
-
         foreach (var childCollider in _colliders)
         {
             Physics.IgnoreCollision(triggerCollider, childCollider, true);

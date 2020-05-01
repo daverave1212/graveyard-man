@@ -806,7 +806,7 @@ GameObject:
   - component: {fileID: 7967507037609588322}
   m_Layer: 0
   m_Name: TriggerHolder
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -850,6 +850,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c80cb5af3f44d3499f0a54471ae1630, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  target: {fileID: 4201576238337244784}
 --- !u!1 &5198568476314332517
 GameObject:
   m_ObjectHideFlags: 0
@@ -1080,7 +1081,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 59e4f09fc96fc614489730b8683d38f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 7841563860153349266}
+  target: {fileID: 4201576238337244784}
   offsetY: 2
 --- !u!1001 &1772668920755571369
 PrefabInstance:
@@ -1104,6 +1105,11 @@ PrefabInstance:
       propertyPath: rigidBodyColliderStart
       value: 
       objectReference: {fileID: 4201576238337244784}
+    - target: {fileID: 1767781434643901235, guid: 874ba7b231437f64b9cae18a86b4335f,
+        type: 3}
+      propertyPath: triggerCollider
+      value: 
+      objectReference: {fileID: 1126247984728872426}
     - target: {fileID: 6266489647905856321, guid: 874ba7b231437f64b9cae18a86b4335f,
         type: 3}
       propertyPath: m_Enabled
