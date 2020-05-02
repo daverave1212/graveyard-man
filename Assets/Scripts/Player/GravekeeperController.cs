@@ -141,7 +141,7 @@ public class GravekeeperController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            if (_corpseInRange != null && _heldItem == null && _corpseInRange.CompareTag("Enemy") && !_holdingCorpse)
+            if (_corpseInRange != null && _heldItem == null && _corpseInRange.CompareTag("Enemy") && !_holdingCorpse && !_corpseInRange.GetComponentInParent<Enemy>().buried)
             {
                 PerformPickupAnimationThenExecute(() =>
                 {
@@ -151,10 +151,11 @@ public class GravekeeperController : MonoBehaviour
                     SetCollisionsWithGameObject(_corpseInRange, false);
                 });
             }
-            else if (_holeInRange != null && _holdingCorpse)
+            else if (_holeInRange != null && _holdingCorpse && !_holeInRange.GetComponent<HoleScript>().HasCorpse())
             {
                 PerformPickupAnimationThenExecute(() =>
                 {
+                    _corpseInRange.GetComponentInParent<Enemy>().buried = true;
                     _holdingCorpse = false;
                     SetCollisionsWithGameObject(_heldItem.GetComponentInParent<Enemy>().gameObject, true);
                     _holeInRange.GetComponentInChildren<HoleScript>()
@@ -303,7 +304,10 @@ public class GravekeeperController : MonoBehaviour
             if (_damageDelay / 2.0f > 1.0f)
             {
                 _damageDelay = 0.0f;
-                DealDamage();
+                if (!other.gameObject.GetComponentInParent<Enemy>().knocked)
+                {
+                    DealDamage();
+                }
             }
         }
     }

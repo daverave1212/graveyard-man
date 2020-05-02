@@ -22,10 +22,10 @@ public class Slider : MonoBehaviour
     public void SlideTo(Vector3 to, System.Action<int> callback = null, float overTime = 1.0f) {
         fromPoint = gameObject.transform.position;
         toPoint = to;
-        print("Starting to slide from:");
-        print(fromPoint);
-        print("To");
-        print(toPoint);
+        // print("Starting to slide from:");
+        // print(fromPoint);
+        // print("To");
+        // print(toPoint);
         startTime = Time.time;
         journeyLength = overTime;
         isSliding = true;
@@ -36,7 +36,7 @@ public class Slider : MonoBehaviour
         if (!isSliding) return;
         float distCovered = (Time.time - startTime) * speed;
         float fractionOfJourney = distCovered / journeyLength;
-        print(_updateCount + " - Fraction of journey:" + fractionOfJourney);
+        // print(_updateCount + " - Fraction of journey:" + fractionOfJourney);
         transform.position = Vector3.Lerp(fromPoint, toPoint, fractionOfJourney);
         if (fractionOfJourney >= 1) {
             isSliding = false;

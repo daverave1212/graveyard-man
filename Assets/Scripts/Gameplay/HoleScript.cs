@@ -127,4 +127,9 @@ public class HoleScript : MonoBehaviour
         _corpse = corpse;
         _hasCorpse = true;
     }
+
+    public bool HasCorpse()
+    {
+        return _hasCorpse;
+    }
 }

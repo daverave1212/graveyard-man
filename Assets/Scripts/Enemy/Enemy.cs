@@ -69,7 +69,7 @@ public class Enemy : MonoBehaviour
 
     private void OnTriggerEnter(Collider collider)
     {
-        if (collider.gameObject.CompareTag("Player") && knocked)
+        if (collider.gameObject.CompareTag("Player") && knocked && !buried)
         {
             hint.SetActive(true);
         }
