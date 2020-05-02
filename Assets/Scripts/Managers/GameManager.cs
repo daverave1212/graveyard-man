@@ -18,6 +18,18 @@ public class GameManager : MonoBehaviour
 
     private float _score = 0.0f;
 
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
     void Start()
     {
         _waitForSpawn = new WaitForSeconds(EnemySpawnRate);
@@ -48,6 +60,7 @@ public class GameManager : MonoBehaviour
     public void IncrementScore(float value)
     {
         _score += value;
+        SaveHighScoreIfValid();
         UpdateScoreLabel();
     }
 

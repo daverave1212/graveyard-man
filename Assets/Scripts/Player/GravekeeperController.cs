@@ -2,6 +2,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GravekeeperController : MonoBehaviour
@@ -230,7 +231,6 @@ public class GravekeeperController : MonoBehaviour
         }
         else if (other.gameObject.CompareTag("Enemy"))
         {
-            Debug.Log("ENEMI");
             if (other.gameObject.GetComponentInParent<Enemy>().knocked)
             {
                 _corpseInRange = other.gameObject.GetComponentInParent<Enemy>().gameObject;
@@ -238,7 +238,6 @@ public class GravekeeperController : MonoBehaviour
         }
         else if (other.gameObject.CompareTag("Hole"))
         {
-            Debug.Log("Hole in range");
             _holeInRange = other.gameObject;
         }
     }
@@ -262,7 +261,6 @@ public class GravekeeperController : MonoBehaviour
         }
         else if (other.gameObject.CompareTag("Hole"))
         {
-            Debug.Log("Hole out of range");
             _holeInRange = null;
         }
     }
@@ -353,6 +351,10 @@ public class GravekeeperController : MonoBehaviour
         _hpBarRectTransform.transform.localScale = new Vector3(health / 100.0f, 1.0f, 1.0f);
         hpLabel.text = health.ToString() + "%";
         SoundManager.Instance.PlaySound("Hit");
+        if (health <= 0.0f)
+        {
+            SceneManager.LoadScene("GameOverScene", LoadSceneMode.Single);
+        }
     }
 
     IEnumerator PlayHurtEffect()

@@ -7,7 +7,7 @@ public class MenuScript : MonoBehaviour
 {
 
     public void PlayGame() {
-        SceneManager.LoadScene("EnvironmentSCene", LoadSceneMode.Single);
+        SceneManager.LoadScene("FinalScene", LoadSceneMode.Single);
     }
 
 }

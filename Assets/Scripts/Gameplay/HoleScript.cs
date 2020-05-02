@@ -94,9 +94,10 @@ public class HoleScript : MonoBehaviour
 
         if (_hasCorpse)
         {
+            GameManager.Instance.IncrementScore(5.0f);
+            GravekeeperController.Instance.StopDigging();
             Destroy(gameObject);
             Destroy(_corpse);
-            GravekeeperController.Instance.StopDigging();
         }
     }
 
@@ -112,9 +113,9 @@ public class HoleScript : MonoBehaviour
 
         if (_progress < 1.0f)
         {
-            Debug.Log(_progress);
             PlayAnimation();
-        } else if (_hasCorpse)
+        }
+        else if (_hasCorpse)
         {
             PlayAnimation();
             StartCoroutine(HoleProgress());

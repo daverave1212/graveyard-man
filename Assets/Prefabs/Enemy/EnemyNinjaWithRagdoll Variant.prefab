@@ -1275,6 +1275,11 @@ PrefabInstance:
       propertyPath: damageAreaCollider
       value: 
       objectReference: {fileID: 6004340199799708760}
+    - target: {fileID: 1767781434643901235, guid: 874ba7b231437f64b9cae18a86b4335f,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6019299153794687201, guid: 874ba7b231437f64b9cae18a86b4335f,
         type: 3}
       propertyPath: m_Enabled
