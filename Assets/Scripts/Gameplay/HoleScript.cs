@@ -21,6 +21,8 @@ public class HoleScript : MonoBehaviour
 
     private GameObject _corpse;
 
+    private AudioSource _diggingSound;
+
     [SerializeField] private float timeToDig = 2.0f;
 
 
@@ -38,6 +40,7 @@ public class HoleScript : MonoBehaviour
         particles.enableEmission = false;
 
         _progressBarRectTransform = progressBar.GetComponent<RectTransform>();
+        _diggingSound = GetComponent<AudioSource>();
 
         PlayAnimation();
         StartCoroutine(HoleProgress());
@@ -48,6 +51,7 @@ public class HoleScript : MonoBehaviour
         originalPosition = transform.position;
         trembler.StartTrembling();
         particles.enableEmission = true;
+        _diggingSound.Play();
     }
 
     public void StopAnimation()
@@ -55,6 +59,7 @@ public class HoleScript : MonoBehaviour
         transform.position = originalPosition;
         trembler.StopTrembling();
         particles.enableEmission = false;
+        _diggingSound.Stop();
     }
 
     IEnumerator HoleProgress()

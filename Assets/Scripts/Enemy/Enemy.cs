@@ -10,6 +10,8 @@ public class Enemy : MonoBehaviour
 
     [SerializeField] private SphereCollider triggerCollider;
 
+    [SerializeField] private CapsuleCollider damageAreaCollider;
+
     [SerializeField] private float timeToRevive = 15.0f;
 
     [SerializeField] private Collider projectileHitbox;
@@ -25,6 +27,8 @@ public class Enemy : MonoBehaviour
 
     private float originalHeight;
 
+    private AudioSource _hitSound;
+
     private void Start()
     {
         _colliders = transform.GetChild(0).gameObject.GetComponentsInChildren<Collider>();
@@ -32,10 +36,13 @@ public class Enemy : MonoBehaviour
 
         originalHeight = draggablePart.transform.position.y;
 
+        _hitSound = GetComponent<AudioSource>();
+
         // Make trigger sphere and projectile collider to ignore inner colliders...
         foreach (var childCollider in _colliders)
         {
             Physics.IgnoreCollision(triggerCollider, childCollider, true);
+            Physics.IgnoreCollision(damageAreaCollider, childCollider, true);
             Physics.IgnoreCollision(projectileHitbox, childCollider, true);
         }
 
@@ -95,6 +102,7 @@ public class Enemy : MonoBehaviour
         knocked = true;
         GetComponentInChildren<Animator>().enabled = false;
         SetRagdollState(true);
+        _hitSound.Play();
         // StartCoroutine(Revive()); We don't do dis no more, too wonky.
     }
 

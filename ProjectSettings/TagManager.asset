@@ -10,6 +10,7 @@ TagManager:
   - PickableShovel
   - Terrain
   - Hole
+  - DamageArea
   layers:
   - Default
   - TransparentFX

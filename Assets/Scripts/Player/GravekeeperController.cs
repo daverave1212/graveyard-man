@@ -32,6 +32,7 @@ public class GravekeeperController : MonoBehaviour
 
     [SerializeField] private GameObject hurtEffectPanel;
 
+
     private RectTransform _hpBarRectTransform;
 
     public float health = 100.0f;
@@ -59,6 +60,8 @@ public class GravekeeperController : MonoBehaviour
     private bool _holdingCorpse;
 
     private bool _holdingShovel;
+
+    private float _damageDelay = 0.0f;
 
 
     private void Awake()
@@ -98,10 +101,12 @@ public class GravekeeperController : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             _animator.SetBool("Run", true);
+            SoundManager.Instance.PlaySound("Footsteps");
         }
 
         // If we press left click run.
-        if (Input.GetMouseButton(0) && !_digging)
+        if (Input.GetMouseButton(0) && !_digging && (_animator.GetCurrentAnimatorStateInfo(0).IsName("Idle") ||
+                                                     _animator.GetCurrentAnimatorStateInfo(0).IsName("Run")))
         {
             transform.position =
                 Vector3.MoveTowards(transform.position, _hit.point, characterSpeed * Time.smoothDeltaTime);
@@ -109,52 +114,50 @@ public class GravekeeperController : MonoBehaviour
         else if (Input.GetMouseButtonUp(0))
         {
             _animator.SetBool("Run", false);
+            SoundManager.Instance.StopSound("Footsteps");
         }
 
         if (Input.GetKeyDown(KeyCode.E))
         {
-            if (_itemInRange != null && _heldItem == null &&
-                (_itemInRange.CompareTag("PickableShovel") || _itemInRange.CompareTag("ProjectileShovel")))
+            PerformPickupAnimationThenExecute(() =>
             {
-                _holdingShovel = true;
-                _heldItem = Instantiate(inHandShovel, handReference.transform.position,
-                    handReference.transform.rotation, handReference.transform);
-                Destroy(_itemInRange);
-            }
+                if (_itemInRange != null && _heldItem == null &&
+                    (_itemInRange.CompareTag("PickableShovel") || _itemInRange.CompareTag("ProjectileShovel")))
+                {
+                    _holdingShovel = true;
+                    _heldItem = Instantiate(inHandShovel, handReference.transform.position,
+                        handReference.transform.rotation, handReference.transform);
+                    Destroy(_itemInRange);
+                }
+            });
         }
 
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            Debug.Log("Corpse In Range: " + (_corpseInRange != null));
-            Debug.Log("Held item: " + (_heldItem != null));
-            if (_corpseInRange != null)
-            {
-                Debug.Log("Corpse in range tag" + _corpseInRange.tag);
-            }
-
-            Debug.Log("Holding corpse: " + _holdingCorpse);
-
             if (_corpseInRange != null && _heldItem == null && _corpseInRange.CompareTag("Enemy") && !_holdingCorpse)
             {
-                Debug.Log("Iau corpu");
-                _heldItem = _corpseInRange.GetComponent<Enemy>().draggablePart;
-                _holdingCorpse = true;
+                PerformPickupAnimationThenExecute(() =>
+                {
+                    _heldItem = _corpseInRange.GetComponent<Enemy>().draggablePart;
+                    _holdingCorpse = true;
 
-                SetCollisionsWithGameObject(_corpseInRange, false);
+                    SetCollisionsWithGameObject(_corpseInRange, false);
+                });
             }
             else if (_holeInRange != null && _holdingCorpse)
             {
-                Debug.Log("Pun coerpungroapa");
-                _holdingCorpse = false;
-                SetCollisionsWithGameObject(_heldItem.GetComponentInParent<Enemy>().gameObject, true);
-                _holeInRange.GetComponentInChildren<HoleScript>()
-                    .SetCorpse(_heldItem.GetComponentInParent<Enemy>().gameObject);
-                _heldItem.transform.position = _holeInRange.transform.position;
-                _heldItem = null;
+                PerformPickupAnimationThenExecute(() =>
+                {
+                    _holdingCorpse = false;
+                    SetCollisionsWithGameObject(_heldItem.GetComponentInParent<Enemy>().gameObject, true);
+                    _holeInRange.GetComponentInChildren<HoleScript>()
+                        .SetCorpse(_heldItem.GetComponentInParent<Enemy>().gameObject);
+                    _heldItem.transform.position = _holeInRange.transform.position;
+                    _heldItem = null;
+                });
             }
             else if (_holdingCorpse)
             {
-                Debug.Log("Dau drumu la corp");
                 SetCollisionsWithGameObject(_heldItem.GetComponentInParent<Enemy>().gameObject, true);
 
                 _heldItem.GetComponentInParent<Enemy>().gameObject.transform.position =
@@ -174,8 +177,8 @@ public class GravekeeperController : MonoBehaviour
         {
             if (!_digging && _holdingShovel)
             {
-                _animator.SetBool("Dig", true);
                 _digging = true;
+                _animator.SetBool("Dig", true);
 
                 if (!_holeInRange)
                 {
@@ -207,6 +210,8 @@ public class GravekeeperController : MonoBehaviour
         {
             SpawnProjectile();
         }
+
+        _damageDelay += Time.deltaTime;
     }
 
 
@@ -287,16 +292,50 @@ public class GravekeeperController : MonoBehaviour
         }
     }
 
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.gameObject.CompareTag("DamageArea"))
+        {
+            if (_damageDelay / 2.0f > 1.0f)
+            {
+                _damageDelay = 0.0f;
+                DealDamage();
+            }
+        }
+    }
+
     private void SpawnProjectile()
     {
+        _animator.SetTrigger("Throw");
+        StartCoroutine(ActuallySpawnProjectile());
+    }
+
+    private void PerformPickupAnimationThenExecute(Action anyMethod)
+    {
+        _animator.SetTrigger("Pickup");
+        StartCoroutine(PerformActionAfterAnimation(0.5f, anyMethod));
+    }
+
+
+    IEnumerator PerformActionAfterAnimation(float time, Action method)
+    {
+        yield return new WaitForSeconds(time);
+        method();
+    }
+
+    IEnumerator ActuallySpawnProjectile()
+    {
+        yield return new WaitForSeconds(0.5f);
         Vector3 projectileStartPos = transform.position + transform.forward * 1.1f;
         projectileStartPos.y = headReference.transform.position.y;
         GameObject projectile =
-            Instantiate(shovelProjectile, projectileStartPos, transform.rotation);
+            Instantiate(shovelProjectile, handReference.transform.position, transform.rotation);
         Rigidbody projectileRB = projectile.GetComponentInChildren<Rigidbody>();
         projectileRB.AddForce(transform.forward * 30f, ForceMode.VelocityChange);
         Destroy(_heldItem);
         _holdingShovel = false;
+
+        SoundManager.Instance.PlaySound("Throw");
     }
 
     public void ResetCollisionForEnemy(GameObject enemy)
@@ -313,6 +352,7 @@ public class GravekeeperController : MonoBehaviour
         StartCoroutine(PlayHurtEffect());
         _hpBarRectTransform.transform.localScale = new Vector3(health / 100.0f, 1.0f, 1.0f);
         hpLabel.text = health.ToString() + "%";
+        SoundManager.Instance.PlaySound("Hit");
     }
 
     IEnumerator PlayHurtEffect()
@@ -320,22 +360,24 @@ public class GravekeeperController : MonoBehaviour
         Image imageRef = hurtEffectPanel.GetComponent<Image>();
         Color color = imageRef.color;
 
-        float _duration = 0.5f;
+        float _duration = 0.2f;
         float _currentTime = 0.0f;
 
         color.a = 0.0f;
         while (_currentTime < _duration)
         {
-            color.a = _currentTime / _duration * 40f;
+            color.a = _currentTime / _duration * 0.4f;
             imageRef.color = color;
+            _currentTime += Time.deltaTime;
             yield return null;
         }
 
         _currentTime = 0.0f;
         while (_currentTime < _duration)
         {
-            color.a = 1 - (_currentTime / _duration) * 40f;
+            color.a = (1 - (_currentTime / _duration)) * 0.4f;
             imageRef.color = color;
+            _currentTime += Time.deltaTime;
             yield return null;
         }
     }
