@@ -13,15 +13,15 @@ Graveyard Man este un joc 3D infinit în care jucătorul controlează groparul u
 ## Gameplay
 
 ### Gameplay Loop
-Jocul se desfășoară în cimitirul groparului. Din când în când (destul de des), se spawn-ează inamici care aleargă după jucător încearcă să îl omoare. Pașii pentru a obține scor sunt următorii:
+Jocul se desfășoară în cimitirul groparului. Din când în când (destul de des), se spawn-ează inamici care aleargă după jucător, încearcă să îl omoare. Pașii pentru a obține scor sunt următorii:
 - Găsește o lopată si ridic-o (va apărea pe ecran un hint să apeși **E**)
-- Sapă o groapă (trebuie să continui să sapi până când groapa este terminată, cam 2 secunde; gropile rămân așa cum sunt chiar dacă te oprești, deci dacă sapi o secundă, poți să te întorci mai târziu și să mai sapi încă o secundă ca să o termini)
-- Aruncă o lopată către un inamic
-- Ridică inamicul și aruncă-l în groapă (va apărea pe ecran un hint să apeși **Q**)
-- Ridică iar o lopată și astupă groapa
+- **Space** Sapă o groapă (trebuie să continui să sapi până când groapa este terminată, cam 2 secunde; gropile rămân așa cum sunt chiar dacă te oprești, deci dacă sapi o secundă, poți să te întorci mai târziu și să mai sapi încă o secundă ca să o termini)
+- Aruncă o lopată către un inamic folosind  **Mouse2**
+- Ridică inamicul și aruncă-l în groapă (va apărea pe ecran un hint să apeși **Q** pentru a-l ridica, și apoi trebuie apăsat **Q** lângă groapă)
+- Ridică iar o lopată și astupă groapa (tot **Space**)
 - Profit
 
-Jucătorul are un _Health Bar_ (viață). Când un inamic se apropie prea tare, jucătorul primește **damage** și îi scade din viață.
+Jucătorul are un _Health Bar_ (viață). Când un inamic se apropie prea tare, jucătorul primește **damage** 5p și îi scade din viață.
 
 Jucătorul poate săpa oricâte gropi cu o lopată. Lopețile și gropile nu dispar, deci jucătorul poate să își pregătească oricâte gropi e necesar.
 
@@ -34,7 +34,7 @@ Controalele jocului pentru diverse acțiuni sunt următoarele:
 - Ridică un cadavru: tasta **Q** când ești lângă un inamic ucis (cadavru)
 
 ### Scor
-Jucătorul primește 10 puncte după ce îngroapă complet un cadavru.
+Jucătorul primește 5 puncte după ce îngroapă complet un cadavru.
 Highscore-ul se salvează automat când se termină jocul și se încarcă la început.
 
 ## Dezvolatare
