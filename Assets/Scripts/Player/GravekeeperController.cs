@@ -99,6 +99,12 @@ public class GravekeeperController : MonoBehaviour
         }
 
 
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneManager.LoadScene("MenuScene", LoadSceneMode.Single);
+        }
+
+
         if (Input.GetMouseButtonDown(0))
         {
             _animator.SetBool("Run", true);
